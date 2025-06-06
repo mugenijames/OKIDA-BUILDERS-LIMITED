@@ -4,7 +4,7 @@ import Projects from './Projects';
 import Services from './Services';
 import Testimonials from './Testimonials';
 import Messages from './Messages';
-import './Dashboard.css'; // Import the CSS file
+import './Dashboard.css'; 
 
 const Dashboard = () => {
   const [activeMenu, setActiveMenu] = useState('teamMembers');

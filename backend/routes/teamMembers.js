@@ -2,17 +2,15 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db'); 
 
-router.get('/', (req, res) => {
-  const sql = 'SELECT * FROM team_members';
-
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.error("Error fetching team members:", err);
-      return res.status(500).json({ error: "Database query failed" });
-    }
-
-    res.json(results);
-  });
+router.get('/', async (req, res) => {
+  console.log('GET /api/team-members hit');
+  try {
+    const [rows] = await db.query('SELECT * FROM team_members');
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching team members:', err.message);
+    res.status(500).json({ error: 'Failed to fetch team members' });
+  }
 });
 
 module.exports = router;

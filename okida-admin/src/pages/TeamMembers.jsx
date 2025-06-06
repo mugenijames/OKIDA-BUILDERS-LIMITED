@@ -9,7 +9,11 @@ const TeamMembers = () => {
   const fetchMembers = async () => {
     const res = await fetch('http://localhost:5000/api/team-members');
     const data = await res.json();
-    setMembers(data);
+    const normalized = data.map(member => ({
+      ...member,
+      photo: typeof member.photo === 'string' ? member.photo : '',
+    }));
+    setMembers(normalized);
   };
 
   useEffect(() => {
@@ -25,12 +29,8 @@ const TeamMembers = () => {
     const formData = new FormData();
     formData.append('name', form.name);
     formData.append('role', form.role);
-
-    if (file) {
-      formData.append('photo', file);
-    } else {
-      formData.append('photoUrl', form.photoUrl);
-    }
+    if (file) formData.append('photo', file);
+    else formData.append('photoUrl', form.photoUrl);
 
     const res = await fetch(url, {
       method,
@@ -61,87 +61,72 @@ const TeamMembers = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Manage Team Members</h2>
-      <div className="mb-4 space-y-2">
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Manage Team Members</h2>
+
+      {/* Form Section */}
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8 space-y-4">
         <input
-          className="border p-2 w-full rounded"
+          className="border border-gray-300 p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Name"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
         <input
-          className="border p-2 w-full rounded"
+          className="border border-gray-300 p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Role"
           value={form.role}
           onChange={(e) => setForm({ ...form, role: e.target.value })}
         />
-
-        <label>
-          Upload photo from file:
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile(e.target.files[0])}
-          />
-        </label>
-
-        {/* <label>
-          Or enter photo URL:
-          <input
-            className="border p-2 w-full rounded"
-            placeholder="Photo URL"
-            value={form.photoUrl}
-            onChange={(e) => setForm({ ...form, photoUrl: e.target.value })}
-          />
-        </label> */}
-
+        <input
+          type="file"
+          accept="image/*"
+          className="border border-gray-300 p-2 w-full rounded-md"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition"
           onClick={handleSubmit}
         >
           {editingId ? 'Update Member' : 'Add Member'}
         </button>
       </div>
 
-      <ul className="space-y-4">
+      {/* Members List */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {members.map((member) => (
-          <li
+          <div
             key={member.member_id}
-            className="bg-white p-4 rounded shadow flex items-center justify-between"
+            className="bg-white rounded-lg shadow-md p-4 flex flex-col items-center text-center"
           >
-            <div className="flex items-center space-x-4">
-              <img
-                src={
-                  member.photo.startsWith('http')
-                    ? member.photo
-                    : `http://localhost:5000/uploads/${member.photo}`
-                }
-                alt={member.name}
-                className="w-16 h-16 rounded-full object-cover"
-              />
-              <div>
-                <h3 className="font-semibold">{member.name}</h3>
-                <p>{member.role}</p>
-              </div>
-            </div>
-            <div className="space-x-2">
+            <img
+              src={
+                typeof member.photo === 'string' && member.photo.startsWith('http')
+                  ? member.photo
+                  : `http://localhost:5000/uploads/${member.photo || 'default.jpg'}`
+              }
+              alt={member.name}
+              className="w-24 h-24 rounded-full object-cover mb-3 border-2 border-gray-200"
+            />
+            <h3 className="text-lg font-semibold text-gray-800">{member.name}</h3>
+            <p className="text-sm text-gray-500 mb-4">{member.role}</p>
+            <div className="flex space-x-2">
               <button
-                className="bg-yellow-400 px-3 py-1 rounded text-white"
+                className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
                 onClick={() => handleEdit(member)}
               >
                 Edit
               </button>
               <button
-                className="bg-red-500 px-3 py-1 rounded text-white"
+                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 onClick={() => handleDelete(member.member_id)}
               >
                 Delete
               </button>
             </div>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
