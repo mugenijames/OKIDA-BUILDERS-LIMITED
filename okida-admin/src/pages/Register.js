@@ -36,6 +36,7 @@ const Register = () => {
           value={form.password}
           onChange={handleChange}
           placeholder="Password"
+          autoComplete='on'
           required
         />
         <button type="submit">Register</button>
